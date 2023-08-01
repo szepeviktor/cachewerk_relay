@@ -35,4 +35,4 @@ jobs:
             name: "Check Dockerfiles"
             uses: "hadolint/hadolint-action@v3.1.0"
             with:
-                recursive: true
+                recursive: "true"
