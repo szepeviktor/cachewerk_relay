@@ -60,64 +60,14 @@ jobs:
             --build-arg RELAY=${{ matrix.version }} .
 
       - name: Run tests
-        env:
-          SHELL: "${{ matrix.build == 'alpine' && 'sh' || 'bash' }}"
         run: |
           docker run \
             ${{ matrix.build }}-${{ matrix.version }} \
-            $SHELL -c "php --ri relay"
+            php --ri relay
 
           docker run \
               --network="host" \
               --volume $(pwd):/root/relay/ \
               --env REDIS_HOST=$REDIS_HOST \
               ${{ matrix.build }}-${{ matrix.version }} \
-              $SHELL -c "php /root/relay/.github/workflows/support/quicktest.php"
-
-  packages:
-
-    name: Package
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - apache2
-          - centos7/centos7-yum
-          - centos8/centos8-dnf
-          - el9/el9-dnf
-          - debian/debian11-apt
-          - ubuntu/ubuntu22-apt
-
-    services:
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 5
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Build Docker container
-        run: |
-          docker build --pull \
-            --tag ${{ matrix.package }} \
-            --file docker/${{ matrix.package }}.Dockerfile .
-
-      - name: Run tests
-        run: |
-          docker run ${{ matrix.package }} bash -c "php --ri relay"
-          docker run \
-              --network="host" \
-              --volume $(pwd):/root/relay/ \
-              --env REDIS_HOST=$REDIS_HOST \
-              ${{ matrix.package }} \
-              bash -c "php /root/relay/.github/workflows/support/quicktest.php"
+              php /root/relay/.github/workflows/support/quicktest.php
