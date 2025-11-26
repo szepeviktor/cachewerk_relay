@@ -3,6 +3,7 @@ FROM archlinux:base-devel
 ARG RELAY=v0.12.1
 
 RUN pacman-key --init \
+  && pacman-key --populate archlinux \
   && pacman -Syu --noconfirm \
   && pacman -S --noconfirm archlinux-keyring \
   php \
